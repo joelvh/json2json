@@ -76,7 +76,7 @@ class ObjectTemplate
     nested.value = value if 'value' not of nested
     nested
   
-  formatNodes: () =>
+  formatNodes: (node, value, key) =>
     # set default formatter or proxy existing
     return { key: key, value: value } if !@config.format
     
