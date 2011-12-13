@@ -26,6 +26,9 @@ class ObjectTemplate
     config
     
   processProperties: (node) =>
+    
+    node = @convertToArray node
+    
     switch sysmo.type node
       when 'Array' then @processArray node
       when 'Object' then @processMap node
@@ -45,6 +48,25 @@ class ObjectTemplate
     
     context
   
+  # flatten an array of arrays, or if one element, convert to array
+  convertToArray: (node) =>
+    # don't do anything if a union option isn't specified
+    return node if !@config.union
+    # convert to array
+    node = [node] if !sysmo.isArray(node)
+    
+    flattened_array = []
+    
+    for element in node
+      child_array = @getNode element, @config.union
+      # if not an array, make into array before merging
+      child_array = [child_array] if !sysmo.isArray(child_array)
+      
+      for child in child_array
+        flattened_array.push child if child?
+    
+    flattened_array
+    
   convertToMap: (node) =>
     context = {}
     
