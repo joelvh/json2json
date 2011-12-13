@@ -34,44 +34,45 @@ class ObjectTemplate
   # assume each array element is a map
   processArray: (node) =>
     # convert array to hash
-    if @config.key
-      context = {}
-      
-      if @config.deep
-        binder = (element, index) =>
-          key = @chooseKey element
-          value = @processProperties element
-          context[key] = value if typeof value isnt "undefined"
-      else
-        binder = (element, index) =>
-          key = @chooseKey element
-          console.log('key', key, 'element', element) if key is 'similar'
-          value = @chooseValue(element, {})
-          formatted = @formatNodes node, value, key
-          context[formatted.key] = formatted.value if typeof formatted.value isnt "undefined"
-    else
-      context = []
-      binder = (element, index) =>
+    return @convertToMap(node) if @config.key
+    
+    context = []
+    for element, index in node
+      if @isProcessable node, element, index
         value = @chooseValue(element, {})
-        formatted = @formatNodes node, value, index
-        context.push formatted.value if typeof formatted.value isnt "undefined"
+        formatted = @applyFormatting node, value, index
+        context.push formatted.value if formatted.value?
+    
+    context
+  
+  convertToMap: (node) =>
+    context = {}
     
     for element, index in node
-      binder element, index if @config.deep || @chooseNodes node, element, index
+      key = @chooseKey element
+      if @config.deep
+        #if @isProcessable node, element, index
+        # re-process as if it's a new child element
+        value = @processProperties element
+        context[key] = value if value?
+      else if @isProcessable node, element, index
+        value = @chooseValue(element, {})
+        formatted = @applyFormatting node, value, key
+        context[formatted.key] = formatted.value if formatted.value?
+    
     context
     
   processMap: (node) =>
-    if @config.nest
-      context = {}
-      # loop through properties to pick up any key/values that should be nested
-      for key, value of node
-        if @chooseNodes node, value, key
-          nested_value = @chooseValue @getNode(node, key), {}
-          formatted = @nestNodes node, nested_value, key
-          context[formatted.key] = formatted.value if typeof formatted.value isnt "undefined"
-    else
-      value = @chooseValue node, {}
-      context = value
+    
+    return @chooseValue(node, {}) if !@config.nest
+    
+    context = {}
+    # loop through properties to pick up any key/values that should be nested
+    for key, value of node
+      if @isProcessable node, value, key
+        nested_value = @chooseValue @getNode(node, key), {}
+        formatted = @nestNodes node, nested_value, key
+        context[formatted.key] = formatted.value if formatted.value?
     context
     
   nestNodes: (node, value, key) =>
@@ -81,7 +82,7 @@ class ObjectTemplate
     nested.value = value if 'value' not of nested
     nested
   
-  formatNodes: (node, value, key) =>
+  applyFormatting: (node, value, key) =>
     # set default formatter or proxy existing
     return { key: key, value: value } if !@config.format
     
@@ -90,10 +91,12 @@ class ObjectTemplate
     formatted.value = value if 'value' not of formatted
     formatted
     
-  chooseNodes: (node, value, key) =>
+  isProcessable: (node, value, key) =>
+    # handling an array is much simpler, if not a function, 
+    return true if sysmo.isArray(node) and !sysmo.isFunction(@config.choose) #(@config.key and @config.value)
+    
     # convert array to chooser function that compares key names
     if !@config.choose
-      return true if @config.all or (@config.key and @config.value)
       @config.choose = []
       for key, value of @config.as
         @config.choose.push value.split('.')[0] if sysmo.isString(value)
@@ -105,16 +108,16 @@ class ObjectTemplate
     # if not a function yet, treat as boolean value
     if !sysmo.isFunction @config.choose
       # if config.key and config.value exist, most likely want to map all
-      choosen = @config.all or (@config.key and @config.value)
+      @config.choosen = @config.all or (@config.key and @config.value)
       !!@config.choose #boolean
     else
-      !!@config.choose node, value, key
+      !!@config.choose.call @, node, value, key
       
   chooseKey: (node) =>
     # if @config.value exists, use that property of the array element as the value
     switch sysmo.type @config.key
       # custom function chooses value based on element
-      when 'Function' then @config.value node
+      when 'Function' then @config.value.call @, node
       # path specifies value from element
       #when 'String' then @getNode node, @config.key
       else @getNode node, @config.key
@@ -123,17 +126,17 @@ class ObjectTemplate
     # if @config.value exists, use that property of the array element as the value
     switch sysmo.type @config.value
       # custom function chooses value based on element
-      when 'Function' then @config.value node
+      when 'Function' then @config.value.call @, node
       # path specifies value from element
       when 'String' then @getNode node, @config.value
       # normal mapping ensues
       else 
         # if @config.include exists, it's assumed to be an array
-        if sysmo.isArray @config.include
-          (context = @processTemplate node, context, @templates(name, as)) for name, as of @config.include
+        #if sysmo.isArray @config.include
+        #  (context = @processTemplate node, context, @templates(name, as)) for name, as of @config.include
         # process currently defined template
-        if @config.as
-          context = @processTemplate node, context, @config.as
+        #if @config.as
+        context = @processTemplate node, context, @config.as
         context
   
   processTemplate: (node, context, template = {}) =>
@@ -154,18 +157,18 @@ class ObjectTemplate
         else filter = defaultFilter
       
       # if the template specifies a function, pass node and key, otherwise it's an internal filter
-      value = if filter is true then filter node, key else filter node, value
+      value = if filter is true then value.call(@, node, key) else filter(node, value)
       # format key and value
-      formatted = @formatNodes node, value, key
-      context[formatted.key] = formatted.value if typeof formatted.value isnt "undefined"
+      formatted = @applyFormatting node, value, key
+      context[formatted.key] = formatted.value if formatted.value?
     
     if !@config.nest
       # loop through properties iode to pick up any key/values that should be choose
       for key, value of node
         # skip if node property already used, the property was specified by the template, or it should not be choose
-        if @paths(node).indexOf(key) is -1 and key not in context and @chooseNodes node, value, key
-          formatted = @formatNodes node, value, key
-          context[formatted.key] = formatted.value if typeof formatted.value isnt "undefined"
+        if @paths(node).indexOf(key) is -1 and key not in context and @isProcessable node, value, key
+          formatted = @applyFormatting node, value, key
+          context[formatted.key] = formatted.value if formatted.value?
       
     context
   
@@ -181,9 +184,8 @@ class ObjectTemplate
   paths: (node, path) =>
     path = path.split('.')[0] if path
     
-    if !@pathCache
-      @pathNodes = if @parent then @parent.pathNodes else (@pathNodes = [])
-      @pathCache = if @parent then @parent.pathCache else (@pathCache = [])
+    @pathNodes or= @parent and @parent.pathNodes or []
+    @pathCache or= @parent and @parent.pathCache or []
     
     index = @pathNodes.indexOf node
     
