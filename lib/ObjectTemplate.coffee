@@ -45,6 +45,7 @@ class ObjectTemplate
       else
         binder = (element, index) =>
           key = @chooseKey element
+          console.log('key', key, 'element', element) if key is 'similar'
           value = @chooseValue(element, {})
           formatted = @formatNodes node, value, key
           context[formatted.key] = formatted.value if typeof formatted.value isnt "undefined"
