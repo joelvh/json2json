@@ -61,9 +61,8 @@ class ObjectTemplate
       child_array = @getNode element, @config.union
       # if not an array, make into array before merging
       child_array = [child_array] if !sysmo.isArray(child_array)
-      
-      for child in child_array
-        flattened_array.push child if child?
+      # add each child to the master array
+      flattened_array.push(child) for child in child_array when child?
     
     flattened_array
     
@@ -90,11 +89,10 @@ class ObjectTemplate
     
     context = {}
     # loop through properties to pick up any key/values that should be nested
-    for key, value of node
-      if @isProcessable node, value, key
-        nested_value = @chooseValue @getNode(node, key), {}
-        formatted = @nestNodes node, nested_value, key
-        context[formatted.key] = formatted.value if formatted.value?
+    for key, value of node when @isProcessable node, value, key
+      nested_value = @chooseValue @getNode(node, key), {}
+      formatted = @nestNodes node, nested_value, key
+      context[formatted.key] = formatted.value if formatted.value?
     context
     
   nestNodes: (node, value, key) =>
@@ -120,12 +118,11 @@ class ObjectTemplate
     # convert array to chooser function that compares key names
     if !@config.choose
       @config.choose = []
-      for key, value of @config.as
-        @config.choose.push value.split('.')[0] if sysmo.isString(value)
+      for key, value of @config.as when sysmo.isString(value)
+        @config.choose.push value.split('.')[0]
     # create callback for arry
     if sysmo.isArray @config.choose
-      for element in @config.choose
-        return true if sysmo.isNumber(key) or element is key
+      return true for element in @config.choose when sysmo.isNumber(key) or element is key
       return false
     # if not a function yet, treat as boolean value
     if !sysmo.isFunction @config.choose
@@ -186,11 +183,10 @@ class ObjectTemplate
     
     if !@config.nest
       # loop through properties iode to pick up any key/values that should be choose
-      for key, value of node
-        # skip if node property already used, the property was specified by the template, or it should not be choose
-        if @paths(node).indexOf(key) is -1 and key not in context and @isProcessable node, value, key
-          formatted = @applyFormatting node, value, key
-          context[formatted.key] = formatted.value if formatted.value?
+      # skip if node property already used, the property was specified by the template, or it should not be choose
+      for key, value of node when @paths(node).indexOf(key) is -1 and key not in context and @isProcessable node, value, key
+        formatted = @applyFormatting node, value, key
+        context[formatted.key] = formatted.value if formatted.value?
       
     context
   
@@ -200,7 +196,7 @@ class ObjectTemplate
   getNode: (node, path) =>
     return node if path is '.'
     @paths node, path
-    sysmo.getDeepValue node, path
+    sysmo.getDeepValue node, path, true
     
   # track the first property in a path for each node through object tree
   paths: (node, path) =>
