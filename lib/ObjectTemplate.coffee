@@ -144,7 +144,7 @@ class ObjectTemplate
       # if the template specifies a function, pass node and key, otherwise it's an internal filter
       value = if filter is true then filter node, key else filter node, value
       # format key and value
-      formatted = @config@formatNodes node, value, key
+      formatted = @formatNodes node, value, key
       context[formatted.key] = formatted.value
     
     if !@config.nest
