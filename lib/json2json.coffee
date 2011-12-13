@@ -1,0 +1,2 @@
+
+exports.ObjectTemplate = require './ObjectTemplate'
