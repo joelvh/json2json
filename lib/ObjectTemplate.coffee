@@ -41,19 +41,19 @@ class ObjectTemplate
         binder = (element, index) =>
           key = @chooseKey element
           value = @processProperties element
-          context[key] = value
+          context[key] = value if typeof value isnt "undefined"
       else
         binder = (element, index) =>
           key = @chooseKey element
           value = @chooseValue(element, {})
           formatted = @formatNodes node, value, key
-          context[formatted.key] = formatted.value
+          context[formatted.key] = formatted.value if typeof formatted.value isnt "undefined"
     else
       context = []
       binder = (element, index) =>
         value = @chooseValue(element, {})
         formatted = @formatNodes node, value, index
-        context.push formatted.value
+        context.push formatted.value if typeof formatted.value isnt "undefined"
     
     for element, index in node
       binder element, index if @config.deep || @chooseNodes node, element, index
@@ -67,7 +67,7 @@ class ObjectTemplate
         if @chooseNodes node, value, key
           nested_value = @chooseValue @getNode(node, key), {}
           formatted = @nestNodes node, nested_value, key
-          context[formatted.key] = formatted.value
+          context[formatted.key] = formatted.value if typeof formatted.value isnt "undefined"
     else
       value = @chooseValue node, {}
       context = value
@@ -156,7 +156,7 @@ class ObjectTemplate
       value = if filter is true then filter node, key else filter node, value
       # format key and value
       formatted = @formatNodes node, value, key
-      context[formatted.key] = formatted.value
+      context[formatted.key] = formatted.value if typeof formatted.value isnt "undefined"
     
     if !@config.nest
       # loop through properties iode to pick up any key/values that should be choose
@@ -164,7 +164,7 @@ class ObjectTemplate
         # skip if node property already used, the property was specified by the template, or it should not be choose
         if @paths(node).indexOf(key) is -1 and key not in context and @chooseNodes node, value, key
           formatted = @formatNodes node, value, key
-          context[formatted.key] = formatted.value
+          context[formatted.key] = formatted.value if typeof formatted.value isnt "undefined"
       
     context
   
