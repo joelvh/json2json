@@ -3,14 +3,7 @@ sysmo = require 'sysmo'
 
 class ObjectTemplate
   constructor: (config, parent) ->
-    # if there is no node path, set to current node
-    config.path or= '.'
-    # ensure 'as' template exists
-    config.as or= {}
-    # convert property name to array
-    config.choose = [config.choose] if sysmo.isString config.choose
-    
-    @config = config
+    @config = @processConfig config
     @parent = parent
   
   transform: (data) =>
@@ -21,6 +14,17 @@ class ObjectTemplate
     
     @processProperties node
   
+  processConfig: (config) =>
+    # if there is no node path, set to current node
+    config.path or= '.'
+    # ensure 'as' template exists
+    config.as or= {}
+    # convert property name to array
+    config.choose = [config.choose] if sysmo.isString config.choose
+    # include multiple templates to apply before this one
+    config.include = [config.include] if sysmo.isString config.include
+    config
+    
   processProperties: (node) =>
     switch sysmo.type node
       when 'Array' then @processArray node
@@ -122,7 +126,14 @@ class ObjectTemplate
       # path specifies value from element
       when 'String' then @getNode node, @config.value
       # normal mapping ensues
-      else @processTemplate node, context, @config.as
+      else 
+        # if @config.include exists, it's assumed to be an array
+        if sysmo.isArray @config.include
+          (context = @processTemplate node, context, @templates(name, as)) for name, as of @config.include
+        # process currently defined template
+        if @config.as
+          context = @processTemplate node, context, @config.as
+        context
   
   processTemplate: (node, context, template = {}) =>
     defaultFilter = (node, value) -> value
@@ -187,7 +198,17 @@ class ObjectTemplate
     
     paths.push(path) if path and paths.indexOf(path) == -1
     paths
-    
-
+  
+  templates: (name, config) =>
+    if !@templateCache
+      @templateCache = if @parent then @parent.templateCache else {}
+    if name and !config
+      @templateCache[name] or null
+    else if name and config
+      @templateCache[name] = @processConfig config
+      @templateCache
+    else
+      @templateCache
+  
 # register module
 module.exports = ObjectTemplate
