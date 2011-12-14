@@ -174,7 +174,7 @@ class ObjectTemplate
         context
   
   processTemplate: (node, context, template = {}) =>
-    defaultFilter = (node, value) -> value
+    
     # loop through properties in template
     for key, value of template
       # process mapping instructions
@@ -184,14 +184,14 @@ class ObjectTemplate
         # array gets multiple property values
         when 'Array' then filter = (node, paths) => @getNode(node, path) for path in paths
         # function is a custom filter for the node
-        when 'Function' then filter = true
+        when 'Function' then (node, value) => value.call(@, node, key)
         # object should be { path: 'path.to.node', defaultValue: ... }
         # when 'Object' then filter = (node, value) -> @getNode(node, value.path) or value.defaultValue
         when 'Object' then filter = (node, config) => new @constructor(config, @).transform node
-        else filter = defaultFilter
+        # default filter
+        else filter = (node, value) -> value
       
-      # if the template specifies a function, pass node and key, otherwise it's an internal filter
-      value = if filter is true then value.call(@, node, key) else filter(node, value)
+      value = filter(node, value)
       # format key and value
       formatted = @applyFormatting node, value, key
       @aggregateValue context, formatted.key, formatted.value
@@ -245,6 +245,7 @@ class ObjectTemplate
       @templateCache
     else
       @templateCache
+      
   
 # register module
 module.exports = ObjectTemplate
