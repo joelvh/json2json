@@ -86,8 +86,8 @@ class ObjectTemplate
       context[key] = value
     else if sysmo.isFunction(@config.aggregate)
       context[key] = @config.aggregate(key, value, existing)
-    else if sysmo.isPlainObject(@config.aggregate) and @config.aggregate[key]
-      @config.aggregate[key](key, value, existing)
+    else if @config.aggregate?[key]
+      context[key] = @config.aggregate[key](key, value, existing)
     else if !sysmo.isArray(existing)
       context[key] = [existing, value]
     else
