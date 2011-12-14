@@ -10,7 +10,7 @@ class ObjectTemplate
     @data = data;
     node = @nodeToProcess data
     
-    return data if !node?
+    return null if !node?
     
     @processProperties node
   
@@ -32,7 +32,7 @@ class ObjectTemplate
     switch sysmo.type node
       when 'Array' then @processArray node
       when 'Object' then @processMap node
-      else node
+      else null #node
   
   # assume each array element is a map
   processArray: (node) =>
@@ -84,6 +84,8 @@ class ObjectTemplate
     # should probalby use .hasOwnProperty, but values shouldn't be null
     if !existing?
       context[key] = value
+    else if sysmo.isFunction(@config.aggregate)
+      context[key] = @config.aggregate(key, value, existing)
     else if !sysmo.isArray(existing)
       context[key] = [existing, value]
     else
@@ -173,7 +175,7 @@ class ObjectTemplate
       # process mapping instructions
       switch sysmo.type value
         # string should be the path to a property on the current node
-        when 'String' then filter = (node, path) => @getNode(node, path) or null
+        when 'String' then filter = (node, path) => result = @getNode(node, path) or null
         # array gets multiple property values
         when 'Array' then filter = (node, paths) => @getNode(node, path) for path in paths
         # function is a custom filter for the node
