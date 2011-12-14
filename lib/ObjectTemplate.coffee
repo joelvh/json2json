@@ -40,11 +40,10 @@ class ObjectTemplate
     return @convertToMap(node) if @config.key
     
     context = []
-    for element, index in node
-      if @isProcessable node, element, index
-        value = @chooseValue(element, {})
-        formatted = @applyFormatting node, value, index
-        context.push formatted.value if formatted.value?
+    for element, index in node when @isProcessable node, element, index
+      value = @chooseValue(element, {})
+      formatted = @applyFormatting node, value, index
+      context.push formatted.value if formatted.value?
     
     context
   
@@ -69,20 +68,29 @@ class ObjectTemplate
   convertToMap: (node) =>
     context = {}
     
-    for element, index in node
+    for element, index in node when @isProcessable node, element, index
       key = @chooseKey element
-      if @config.deep
-        #if @isProcessable node, element, index
-        # re-process as if it's a new child element
-        value = @processProperties element
-        context[key] = value if value?
-      else if @isProcessable node, element, index
-        value = @chooseValue(element, {})
-        formatted = @applyFormatting node, value, key
-        context[formatted.key] = formatted.value if formatted.value?
-    
+      value = @chooseValue(element, {})
+      formatted = @applyFormatting node, value, key
+      @aggregateValue context, formatted.key, formatted.value
+        
     context
+  
+  aggregateValue: (context, key, value) =>
+    return context if !value?
     
+    existing = context[key]
+    
+    # should probalby use .hasOwnProperty, but values shouldn't be null
+    if !existing?
+      context[key] = value
+    else if !sysmo.isArray(existing)
+      context[key] = [existing, value]
+    else
+      context[key].push value
+      
+    context
+  
   processMap: (node) =>
     
     return @chooseValue(node, {}) if !@config.nest
@@ -92,7 +100,7 @@ class ObjectTemplate
     for key, value of node when @isProcessable node, value, key
       nested_value = @chooseValue @getNode(node, key), {}
       formatted = @nestNodes node, nested_value, key
-      context[formatted.key] = formatted.value if formatted.value?
+      @aggregateValue context, formatted.key, formatted.value
     context
     
   nestNodes: (node, value, key) =>
@@ -136,7 +144,7 @@ class ObjectTemplate
     # if @config.value exists, use that property of the array element as the value
     switch sysmo.type @config.key
       # custom function chooses value based on element
-      when 'Function' then @config.value.call @, node
+      when 'Function' then @config.key.call @, node
       # path specifies value from element
       #when 'String' then @getNode node, @config.key
       else @getNode node, @config.key
@@ -179,14 +187,14 @@ class ObjectTemplate
       value = if filter is true then value.call(@, node, key) else filter(node, value)
       # format key and value
       formatted = @applyFormatting node, value, key
-      context[formatted.key] = formatted.value if formatted.value?
-    
+      @aggregateValue context, formatted.key, formatted.value
+      
     if !@config.nest
       # loop through properties iode to pick up any key/values that should be choose
       # skip if node property already used, the property was specified by the template, or it should not be choose
       for key, value of node when @paths(node).indexOf(key) is -1 and key not in context and @isProcessable node, value, key
         formatted = @applyFormatting node, value, key
-        context[formatted.key] = formatted.value if formatted.value?
+        @aggregateValue context, formatted.key, formatted.value
       
     context
   
