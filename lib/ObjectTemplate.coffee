@@ -81,16 +81,19 @@ class ObjectTemplate
     
     existing = context[key]
     
-    # should probalby use .hasOwnProperty, but values shouldn't be null
-    if !existing?
-      context[key] = value
-    else if sysmo.isFunction(@config.aggregate)
+    if sysmo.isFunction(@config.aggregate)
+      console.log 'aggregate', 12, key
       context[key] = @config.aggregate(key, value, existing)
     else if @config.aggregate?[key]
+      console.log 'aggregate', 13, key
       context[key] = @config.aggregate[key](key, value, existing)
+    else if !existing?
+      context[key] = value
     else if !sysmo.isArray(existing)
+      console.log 'aggregate', 14, key
       context[key] = [existing, value]
     else
+      console.log 'aggregate', 15, key
       context[key].push value
       
     context
