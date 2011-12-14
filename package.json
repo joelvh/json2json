@@ -1,6 +1,6 @@
 { "name" : "json2json"
 , "description" : "A simple way to transform a JSON object to another JSON structure"
-, "version" : "0.0.15"
+, "version" : "0.1.0"
 , "author" : "Joel Van Horn <joel@joelvanhorn.com>"
 , "repository" :
   { "type" : "git"
