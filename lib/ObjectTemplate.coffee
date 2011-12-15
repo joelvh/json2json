@@ -1,5 +1,6 @@
 
 sysmo = require 'sysmo'
+TemplateConfig = require './TemplateConfig'
 
 class ObjectTemplate
   constructor: (config, parent) ->
