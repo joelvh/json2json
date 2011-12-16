@@ -70,7 +70,6 @@ class ObjectTemplate
     # loop through properties to pick up any key/values that should be chosen.
     # skip if node property already used, the property was specified by the template, or it should not be choose.
     for key, value of node when !@pathAccessed(node, key) and key not in context and @config.processable node, value, key
-      console.log 'remaining', key
       @updateContext context, node, value, key
     context
     
