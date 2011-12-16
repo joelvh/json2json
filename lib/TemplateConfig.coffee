@@ -63,26 +63,17 @@ class TemplateConfig
   # used to combine or reduce a value if one already exists in the context.
   # can be a map that aggregates specific properties
   aggregate: (context, key, value, existing) =>
-    if sysmo.isFunction(@config.aggregate)
-      !! context[key] = @config.aggregate(key, value, existing)
-    else if sysmo.isFunction(@config.aggregate?[key])
-      !! context[key] = @config.aggregate[key](key, value, existing)
-    else false
+    aggregator = @config.aggregate?[key] or @config.aggregate
+    
+    return false if !sysmo.isFunction(aggregator)
+    
+    context[key] = aggregator(key, value, existing)
+    
+    return true
   
   applyFormatting: (node, value, key) =>
-    if sysmo.isFunction(@config.format)
-      @format @config.format, node, value, key
-      
-    else if sysmo.isFunction(@config.format?[key])
-      @format @config.format[key], node, value, key
-      
-    else @ensureKeyValue key, value
-  
-  format: (formatter, node, value, key) =>
-    pair = formatter node, value, key
-    @ensureKeyValue key, value, pair
-  
-  ensureKeyValue: (key, value, pair = {}) ->
+    formatter = @config.format?[key] or @config.format
+    pair = if sysmo.isFunction(formatter) then formatter(node, value, key) else {}
     pair.key = key if 'key' not of pair
     pair.value = value if 'value' not of pair
     pair
