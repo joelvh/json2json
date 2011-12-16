@@ -14,10 +14,10 @@ class TemplateConfig
     
     # create settings
     @arrayToMap = !!config.key
-    @nestTemplate = sysmo.isFunction config.nested
+    @directMap = !!(@arrayToMap and config.value)
+    @nestTemplate = !!config.nested
     @formattable = sysmo.isFunction config.format
-    #TODO: is this used?
-    @union = config.union
+    @includeAll = !!config.all
     
     @config = config
   
@@ -36,23 +36,24 @@ class TemplateConfig
       else                    name: 'template', value: @config.as
   
   processable: (node, value, key) =>
-    # handling an array is much simpler, if not a function, 
-    return true if sysmo.isArray(node) and !sysmo.isFunction(@config.choose) #(@config.key and @config.value)
-    
+    # choose() implies filtering
+    return true if !@config.choose and @includeAll # and !@nestTemplate
+
     # convert array to chooser function that compares key names
-    if !@config.choose
-      @config.choose = []
+    if !@config.choose and !@paths
+      @paths = []
       for key, value of @config.as when sysmo.isString(value)
-        @config.choose.push value.split('.')[0]
+        @paths.push value.split('.')[0]
     # create callback for arry
     if sysmo.isArray @config.choose
-      return true for element in @config.choose when sysmo.isNumber(key) or element is key
+      paths = @paths or []
+      paths = paths.concat @config.choose
+      return true for path in paths when path.split('.')[0] is key
       return false
     # if not a function yet, treat as boolean value
     if !sysmo.isFunction @config.choose
       # if config.key and config.value exist, most likely want to map all
-      @config.choosen = @config.all or (@config.key and @config.value)
-      !!@config.choose #boolean
+      !!(@includeAll or @directMap) #boolean
     else
       !!@config.choose.call @, node, value, key
   
@@ -66,6 +67,9 @@ class TemplateConfig
   
   applyFormatting: (node, value, key) =>
     pair = @config.format(node, value, key) if @formattable
+    @ensureKeyValue key, value, pair
+  
+  ensureKeyValue: (key, value, pair = {}) ->
     pair.key = key if 'key' not of pair
     pair.value = value if 'value' not of pair
     pair

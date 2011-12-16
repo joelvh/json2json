@@ -23,12 +23,12 @@ class ObjectTemplate
     # convert array to hash if config.arrayToMap is true
     context = if @config.arrayToMap then {} else []
     
-    for element, index in node when @config.processable node, element, index
+    for element, index in node #when @config.processable node, element, index
       # convert the index to a key if converting array to map 
       # @updateContext handles the context type automatically
-      index = @chooseKey(element) if @config.arrayToMap
+      key = if @config.arrayToMap then @chooseKey(element) else index
       value = @chooseValue(element, {})
-      @updateContext context, element, value, index
+      @updateContext context, element, value, key
     context
   
   processMap: (node) =>
@@ -40,8 +40,9 @@ class ObjectTemplate
     # loop through properties to pick up any key/values that should be nested
     for key, value of node when @config.processable node, value, key
       # call @getNode() to register the use of the property on that node
-      value = @chooseValue @getNode(node, key), {}
-      @updateContext context, element, value, key
+      nested = @getNode(node, key)
+      value = @chooseValue nested, {}
+      @updateContext context, nested, value, key
     context
     
   processTemplate: (node, context, template = {}) =>
@@ -66,11 +67,10 @@ class ObjectTemplate
     context
   
   processRemaining: (context, node) =>
-    #return context if @config.nestTemplate
-    
-    # loop through properties to pick up any key/values that should be chosen
-    # skip if node property already used, the property was specified by the template, or it should not be choose
+    # loop through properties to pick up any key/values that should be chosen.
+    # skip if node property already used, the property was specified by the template, or it should not be choose.
     for key, value of node when !@pathAccessed(node, key) and key not in context and @config.processable node, value, key
+      console.log 'remaining', key
       @updateContext context, node, value, key
     context
     
