@@ -72,8 +72,12 @@ class TemplateConfig
     return true
   
   applyFormatting: (node, value, key) =>
-    formatter = @config.format?[key] or @config.format
-    pair = if sysmo.isFunction(formatter) then formatter(node, value, key) else {}
+    # if key is a number, assume this is an array element and skip
+    if !sysmo.isNumber(key)
+      formatter = @config.format?[key] or @config.format
+      pair = if sysmo.isFunction(formatter) then formatter(node, value, key) else {}
+    else pair = {}
+    
     pair.key = key if 'key' not of pair
     pair.value = value if 'value' not of pair
     pair

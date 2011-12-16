@@ -27,11 +27,22 @@ class ObjectTemplate
       # convert the index to a key if converting array to map 
       # @updateContext handles the context type automatically
       key = if @config.arrayToMap then @chooseKey(element) else index
-      value = @chooseValue(element, {})
+      value = @createNestedMap(element)
       @updateContext context, element, value, key
     context
   
   processMap: (node) =>
+    
+    context = @createNestedMap node
+    
+    if @config.nestTemplate and (nested_key = @chooseKey(node))
+      nested_context = {}
+      nested_context[nested_key] = context;
+      context = nested_context
+    
+    context
+  
+  createNestedMap: (node) =>
     
     context = {}
     
@@ -44,7 +55,22 @@ class ObjectTemplate
       value = @chooseValue nested, {}
       @updateContext context, nested, value, key
     context
+  
+  chooseKey: (node) =>
+    result = @config.getKey node
+    switch result.name
+      when 'value'    then result.value
+      when 'path'     then @getNode node, result.value
+      else null
     
+  chooseValue: (node, context) =>
+    result = @config.getValue node
+    switch result.name
+      when 'value'    then result.value
+      when 'path'     then @getNode node, result.value
+      when 'template' then @processTemplate node, context, result.value
+      else null
+  
   processTemplate: (node, context, template = {}) =>
     
     # loop through properties in template
@@ -62,14 +88,15 @@ class ObjectTemplate
       
       value = filter(node, value)
       @updateContext context, node, value, key
-      @processRemaining context, node
-      
+    
+    @processRemaining context, node
     context
   
   processRemaining: (context, node) =>
     # loop through properties to pick up any key/values that should be chosen.
     # skip if node property already used, the property was specified by the template, or it should not be choose.
     for key, value of node when !@pathAccessed(node, key) and key not in context and @config.processable node, value, key
+      console.log 'remaining', 'key', key
       @updateContext context, node, value, key
     context
     
@@ -99,25 +126,11 @@ class ObjectTemplate
       
     context
   
-  chooseKey: (node) =>
-    result = @config.getKey node
-    switch result.name
-      when 'value'    then result.value
-      when 'path'     then @getNode node, result.value
-      else null
-    
-  chooseValue: (node, context) =>
-    result = @config.getValue node
-    switch result.name
-      when 'value'    then result.value
-      when 'path'     then @getNode node, result.value
-      when 'template' then @processTemplate node, context, result.value
-      else null
-  
   nodeToProcess: (node) =>
     @getNode node, @config.getPath()
   
   getNode: (node, path) =>
+    return null if !path
     return node if path is '.'
     @paths node, path
     sysmo.getDeepValue node, path, true
