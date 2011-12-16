@@ -83,7 +83,7 @@ class ObjectTemplate
     
     # if context is an array, just add the value
     if sysmo.isArray(context)
-      context.push(formatted.value)
+      context.push(value)
       return context
     
     existing = context[key]
