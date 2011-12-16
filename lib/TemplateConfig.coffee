@@ -14,7 +14,7 @@ class TemplateConfig
     
     # create settings
     @arrayToMap = !!config.key
-    @nestable = sysmo.isFunction config.nest
+    @nestTemplate = sysmo.isFunction config.nested
     @formattable = sysmo.isFunction config.format
     #TODO: is this used?
     @union = config.union
@@ -58,22 +58,14 @@ class TemplateConfig
   
   # returns a b
   aggregate: (context, key, value, existing) =>
-    
     if sysmo.isFunction(@config.aggregate)
       !! context[key] = @config.aggregate(key, value, existing)
-    else if @config.aggregate?[key]
+    else if sysmo.isFunction(@config.aggregate?[key])
       !! context[key] = @config.aggregate[key](key, value, existing)
     else false
   
-  applyNesting: (node, value, key) =>
-    pair = @config.nest(node, value, key) if @nestable
-    @ensureKeyValue key, value, pair
-  
   applyFormatting: (node, value, key) =>
     pair = @config.format(node, value, key) if @formattable
-    @ensureKeyValue key, value, pair
-  
-  ensureKeyValue: (key, value, pair = {}) ->
     pair.key = key if 'key' not of pair
     pair.value = value if 'value' not of pair
     pair

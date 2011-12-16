@@ -8,17 +8,11 @@ class ObjectTemplate
     @parent = parent
   
   transform: (data) =>
-    @data = data;
     node = @nodeToProcess data
     
     return null if !node?
     
-    @processProperties node
-  
-  processProperties: (node) =>
-    
-    node = @makeFlattenedArray node
-    
+    # process properties
     switch sysmo.type node
       when 'Array'  then @processArray node
       when 'Object' then @processMap node
@@ -26,73 +20,28 @@ class ObjectTemplate
   
   # assume each array element is a map
   processArray: (node) =>
-    # convert array to hash
-    return @convertToMap(node) if @config.arrayToMap
-    
-    context = []
+    # convert array to hash if config.arrayToMap is true
+    context = if @config.arrayToMap then {} else []
     
     for element, index in node when @config.processable node, element, index
+      # convert the index to a key if converting array to map 
+      # @updateContext handles the context type automatically
+      index = @chooseKey(element) if @config.arrayToMap
       value = @chooseValue(element, {})
-      formatted = @config.applyFormatting node, value, index
-      context.push formatted.value if formatted.value?
-    
-    context
-  
-  # flatten an array of arrays, or if one element, convert to array
-  makeFlattenedArray: (node) =>
-    # don't do anything if a union option isn't specified
-    return node if !@config.union
-    # convert to array
-    node = [node] if !sysmo.isArray(node)
-    
-    flattened_array = []
-    
-    for element in node
-      child_array = @getNode element, @config.union
-      # if not an array, make into array before merging
-      child_array = [child_array] if !sysmo.isArray(child_array)
-      # add each child to the master array
-      flattened_array.push(child) for child in child_array when child?
-    
-    flattened_array
-    
-  convertToMap: (node) =>
-    context = {}
-    
-    for element, index in node when @config.processable node, element, index
-      key = @chooseKey element
-      value = @chooseValue(element, {})
-      formatted = @config.applyFormatting node, value, key
-      @aggregateValue context, formatted.key, formatted.value
-        
-    context
-  
-  aggregateValue: (context, key, value) =>
-    return context if !value?
-    
-    existing = context[key]
-    
-    return context if @config.aggregate context, key, value, existing
-    
-    if !existing?
-      context[key] = value
-    else if !sysmo.isArray(existing)
-      context[key] = [existing, value]
-    else
-      context[key].push value
-      
+      @updateContext context, element, value, index
     context
   
   processMap: (node) =>
     
-    return @chooseValue(node, {}) if !@config.nestable
-    
     context = {}
+    
+    return @chooseValue(node, context) if !@config.nestTemplate
+    
     # loop through properties to pick up any key/values that should be nested
     for key, value of node when @config.processable node, value, key
-      nested_value = @chooseValue @getNode(node, key), {}
-      formatted = @config.applyNesting node, nested_value, key
-      @aggregateValue context, formatted.key, formatted.value
+      # call @getNode() to register the use of the property on that node
+      value = @chooseValue @getNode(node, key), {}
+      @updateContext context, element, value, key
     context
     
   processTemplate: (node, context, template = {}) =>
@@ -111,16 +60,43 @@ class ObjectTemplate
         else                  filter = (node, value)  -> value
       
       value = filter(node, value)
-      # format key and value
-      formatted = @config.applyFormatting node, value, key
-      @aggregateValue context, formatted.key, formatted.value
+      @updateContext context, node, value, key
+      @processRemaining context, node
       
-    if !@config.nestable
-      # loop through properties iode to pick up any key/values that should be choose
-      # skip if node property already used, the property was specified by the template, or it should not be choose
-      for key, value of node when @paths(node).indexOf(key) is -1 and key not in context and @config.processable node, value, key
-        formatted = @config.applyFormatting node, value, key
-        @aggregateValue context, formatted.key, formatted.value
+    context
+  
+  processRemaining: (context, node) =>
+    #return context if @config.nestTemplate
+    
+    # loop through properties to pick up any key/values that should be chosen
+    # skip if node property already used, the property was specified by the template, or it should not be choose
+    for key, value of node when !@pathAccessed(node, key) and key not in context and @config.processable node, value, key
+      @updateContext context, node, value, key
+    context
+    
+  updateContext: (context, node, value, key) =>
+    # format key and value
+    formatted = @config.applyFormatting node, value, key
+    @aggregateValue(context, formatted.key, formatted.value)
+      
+  aggregateValue: (context, key, value) =>
+    return context if !value?
+    
+    # if context is an array, just add the value
+    if sysmo.isArray(context)
+      context.push(formatted.value)
+      return context
+    
+    existing = context[key]
+    
+    return context if @config.aggregate context, key, value, existing
+    
+    if !existing?
+      context[key] = value
+    else if !sysmo.isArray(existing)
+      context[key] = [existing, value]
+    else
+      context[key].push value
       
     context
   
@@ -146,6 +122,10 @@ class ObjectTemplate
     return node if path is '.'
     @paths node, path
     sysmo.getDeepValue node, path, true
+    
+  pathAccessed: (node, path) =>
+    key = path.split('.')[0]
+    @paths(node).indexOf(key) isnt -1
     
   # track the first property in a path for each node through object tree
   paths: (node, path) =>
