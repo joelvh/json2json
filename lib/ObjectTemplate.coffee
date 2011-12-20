@@ -27,6 +27,7 @@ class ObjectTemplate
       # convert the index to a key if converting array to map 
       # @updateContext handles the context type automatically
       key = if @config.arrayToMap then @chooseKey(element) else index
+      # don't call @processMap because it can lead to double nesting if @config.nestTemplate is true
       value = @createNestedMap(element)
       @updateContext context, element, value, key
     context
@@ -96,7 +97,6 @@ class ObjectTemplate
     # loop through properties to pick up any key/values that should be chosen.
     # skip if node property already used, the property was specified by the template, or it should not be choose.
     for key, value of node when !@pathAccessed(node, key) and key not in context and @config.processable node, value, key
-      console.log 'remaining', 'key', key
       @updateContext context, node, value, key
     context
     
