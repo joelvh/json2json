@@ -28,13 +28,13 @@ class ObjectTemplate
       # @updateContext handles the context type automatically
       key = if @config.arrayToMap then @chooseKey(element) else index
       # don't call @processMap because it can lead to double nesting if @config.nestTemplate is true
-      value = @createNestedMap(element)
+      value = @createMapStructure(element)
       @updateContext context, element, value, key
     context
   
   processMap: (node) =>
     
-    context = @createNestedMap node
+    context = @createMapStructure node
     
     if @config.nestTemplate and (nested_key = @chooseKey(node))
       nested_context = {}
@@ -43,7 +43,7 @@ class ObjectTemplate
     
     context
   
-  createNestedMap: (node) =>
+  createMapStructure: (node) =>
     
     context = {}
     
@@ -53,19 +53,21 @@ class ObjectTemplate
     for key, value of node when @config.processable node, value, key
       # call @getNode() to register the use of the property on that node
       nested = @getNode(node, key)
-      value = @chooseValue nested, {}
+      value = @chooseValue nested
       @updateContext context, nested, value, key
     context
   
   chooseKey: (node) =>
     result = @config.getKey node
+    
     switch result.name
       when 'value'    then result.value
       when 'path'     then @getNode node, result.value
       else null
     
-  chooseValue: (node, context) =>
+  chooseValue: (node, context = {}) =>
     result = @config.getValue node
+    
     switch result.name
       when 'value'    then result.value
       when 'path'     then @getNode node, result.value
@@ -161,16 +163,5 @@ class ObjectTemplate
     paths.push(path) if path and paths.indexOf(path) == -1
     paths
   
-  templates: (name, config) =>
-    if !@templateCache
-      @templateCache = if @parent then @parent.templateCache else {}
-    if name and !config
-      @templateCache[name] or null
-    else if name and config
-      @templateCache[name] = @processConfig config
-      @templateCache
-    else
-      @templateCache
-
 # register module
 module.exports = ObjectTemplate
