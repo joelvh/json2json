@@ -65,10 +65,10 @@ on the original JSON object to transform.
 
         bins:  
 
-The "path" property is described above. 
-Here the value specifies where within the original JSON object to find the value you want. 
+The "path" property was described previously. 
+However, this time the path is relative to the value in the original JSON that was selected by the previous "path" (above). 
 It is possible to access properties of objects that are in an array. 
-An array of all values will be returned and used as the value to transform. 
+A flattened array of all values will be returned and used as the value to transform. 
 
           path: 'Items.SearchBinSets.SearchBinSet.Bin' 
 
