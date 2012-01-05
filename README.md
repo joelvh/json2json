@@ -143,7 +143,11 @@ To provide more flexibility, a function can use dynamic matching to choose which
                 url: 'URL' 
                 height: 'Height.#' 
                 width: 'Width.#' 
-    
+
+And finally, create an instance of the "ObjectTemplate" object, 
+passing the template to the constructor. 
+Then call the "transform" method, passing it the data you want to transform. 
+
     new ObjectTemplate(tmpl).transform data 
 
 ## License
