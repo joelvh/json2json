@@ -28,18 +28,18 @@ when converting an array to a map.)
 
 (Look at the "example" folder to see this template and the JSON before and after transformation.) 
 
-A template specifies a set of rules that describe how to transform a property in a JSON object. 
+A template specifies a set of rules that describe how to transform a property in your original JSON. 
 A template itself is a javascript object. 
-This example is written in CoffeeScript and has in-line comments to explain each property: 
+This example is written in CoffeeScript and has comments to explain each property: 
 
 The template object is stored as the "tmpl" variable. 
-The template typically matches the root of the JSON object. 
+The template typically matches the root of the original JSON. 
 
     tmpl = 
     
 The "path" property specifies what property on the JSON object to process. 
 The '.' value specifies to use the root in this case. 
-The JSON object can be an array as well. 
+The original JSON can be an array as well. 
 
       path: '.' 
       
@@ -53,13 +53,14 @@ The "existing" parameter sent to each aggregate function specifies a value if on
         pages: (key, value, existing) -> if !sysmo.isArray(value) then value else value.sort().reverse()[0] 
 
 The "as" property lets you specify all the properties you want on your new JSON object. 
+(These are the only properties that will be created on the new JSON object.) 
 This is where you define the mapping rules. 
 It is effectively a list of nested templates. 
 
       as: 
 
 The "bins" property is going to be created on your new JSON object. 
-The object defined as the value of "bins" here is another set of rules that define what property 
+The template defined for "bins" here is another set of rules that specify what property 
 on the original JSON object to transform. 
 
         bins:  
@@ -71,13 +72,15 @@ An array of all values will be returned and used as the value to transform.
 
           path: 'Items.SearchBinSets.SearchBinSet.Bin' 
 
-The "key" property lets you convert an array to a map. 
-The value of the "key" property specifies the path to the value to use as the property on the new map. 
+The "key" property indicates you want to convert an array to a map. 
+The "key" property lets you specify the property in the original JSON object to use as the key in the new map. 
 The value retrieved from the original JSON object will be converted to a string. 
+(You can specify a function that is passed the original JSON value and returns a key to use.) 
 
           key: 'BinParameter.Value' 
 
 The "value" property (optional) lets you specify the property in the original JSON object to use as the value in the new map. 
+(You can specify a function that is passed the original JSON value and returns a value to use.) 
 
           value: 'BinItemCount' 
 
@@ -126,6 +129,12 @@ The properties defined in the "as" template below will be stored in the nested o
             image_sets: 
               path: 'ImageSets.ImageSet' 
               key: '@.Category' 
+
+The "choose" property can be a function that returns a boolean. 
+In the previous "choose" example, an array of property names (e.g. hash "keys") were specified, 
+which indicated what properties on the original JSON value to transform. 
+To provide more flexibility, a function can use dynamic matching to choose which properties to transform. 
+
               choose: (node, value, key) -> key isnt '@' 
               format: (node, value, key) -> key: key.replace(/Image$/, '').toLowerCase() 
               nested: true 
