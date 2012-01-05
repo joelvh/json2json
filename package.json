@@ -14,9 +14,5 @@
   { "sysmo" : "https://github.com/joelvh/Sysmo.js/tarball/master"
   }
 , "engines" : { "node" : ">=0.1.97" }
-, "licenses" :
-  [ { "type" : "MIT"
-    , "url" : "http://github.com/joelvh/json2json/raw/master/LICENSE"
-    }
-  ]
+, "licenses" : []
 }
