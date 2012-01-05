@@ -92,7 +92,8 @@ a single function is used to aggregate the array values being processed on the o
           path: 'Items.Item' 
 
 The "all" property specifies that all properties on the matched object in the original JSON object for which 
-no rule has been defined should automatically be copied to the new JSON object.
+no rule has been defined should automatically be copied to the new JSON object. 
+(By default, only the properties specified in the "as" template are created on the new JSON.) 
 
           all: true 
           as: 
