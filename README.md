@@ -75,16 +75,16 @@ A flattened array of all values will be returned and used as the value to transf
 The "key" property indicates you want to convert an array to a map. 
 The "key" property lets you specify the property in the original JSON object to use as the key in the new map. 
 The value retrieved from the original JSON object will be converted to a string. 
-(You can specify a function that is passed the original JSON value and returns a key to use.) 
+(Alternatively, you can specify a function that is passed the original JSON value and returns a key to use.) 
 
           key: 'BinParameter.Value' 
 
 The "value" property (optional) lets you specify the property in the original JSON object to use as the value in the new map. 
-(You can specify a function that is passed the original JSON value and returns a value to use.) 
+(Alternatively, you can specify a function that is passed the original JSON value and returns a value to use.) 
 
           value: 'BinItemCount' 
 
-The "aggregate" property works the same as above, but instead of specifying a map of functions, 
+The "aggregate" property works the same as previously described, but instead of specifying a map of functions, 
 a single function is used to aggregate the array values being processed on the original JSON object.
 
           aggregate: (key, value, existing) -> Math.max(value, existing || 0) 
@@ -94,6 +94,7 @@ a single function is used to aggregate the array values being processed on the o
 The "all" property specifies that all properties on the matched object in the original JSON object for which 
 no rule has been defined should automatically be copied to the new JSON object. 
 (By default, only the properties specified in the "as" template are created on the new JSON.) 
+The "all" option only works if "choose" is not defined (see below). 
 
           all: true 
           as: 
@@ -113,6 +114,7 @@ The "choose" property defines an array of properties on the original JSON object
 The "format" property defines a function that processes each of the values retrieved from the original JSON object 
 and returns an object with "key" and "value" properties. 
 This allows you to format the key and value however you wish. 
+(If a "key" or "value" property is not returned, the original value is used.) 
 The "node" parameter to the format function is the object or array in the original JSON that is being transformed. 
 (It is the object that contains the properties defined by the "choose" array.)
 
@@ -132,9 +134,9 @@ The properties defined in the "as" template below will be stored in the nested o
               key: '@.Category' 
 
 The "choose" property can be a function that returns a boolean. 
-In the previous "choose" example, an array of property names (e.g. hash "keys") were specified, 
+In the previous "choose" example, an array of property names (e.g. map/hash "keys") were specified, 
 which indicated what properties on the original JSON value to transform. 
-To provide more flexibility, a function can use dynamic matching to choose which properties to transform. 
+To provide more flexibility, a function can be used to dynamically choose which properties to transform. 
 
               choose: (node, value, key) -> key isnt '@' 
               format: (node, value, key) -> key: key.replace(/Image$/, '').toLowerCase() 
