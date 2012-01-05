@@ -8,12 +8,35 @@ json2json is written in CoffeeScript, which is easily translated into JavaScript
 It's designed to run in a Node.js environment with the CoffeeScript package installed. 
 You can require json2json just like any other package. 
 
-## Template options
+## Template rules
 
-There are several template options for transforming JSON. 
+There are several template rules for transforming JSON. 
 The template describes what the resulting document structure will look like. 
 
-### Basic template structure
+The "original JSON" is your raw data you want to transform. 
+The "new JSON" is the resulting, transformed data.
+
+### Basic concepts
+
+The following description of how a template is defined incorporates the keywords used in a template: 
+
+A template specifies the "path" to the value on your original JSON you want to transform 
+and assumes that value is either an object or an array. 
+If it's an object, you can "choose" which properties you want to transform.
+If it's an array, you can "aggregate" the values you want to transform. 
+
+Sometimes you want to convert an array to a map (aka JSON object). 
+To do this, you can specify what value on your original JSON to use as the "key". 
+If you want to make it a really simple map, 
+you can specify what value on your original JSON to use as the "value". 
+
+Templates specify how the original JSON data will be represented "as" properties on the new JSON. 
+(The only time the "as" rules are ignored is if the "value" rule exists 
+when converting an array to a map.) 
+
+### Describing the example template
+
+(Look at the "example" folder to see this template and the JSON before and after transformation.) 
 
 A template specifies a set of rules that describe how to transform a property in a JSON object. 
 A template itself is a javascript object. 
