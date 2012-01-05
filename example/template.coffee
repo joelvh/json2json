@@ -1,9 +1,8 @@
-
 tmpl = 
   path: '.'
   aggregate: 
-    total: (key, value, existing) -> if !sysmo.isArray(value) then value else value.sort().reverse()[0]
-    pages: (key, value, existing) -> if !sysmo.isArray(value) then value else value.sort().reverse()[0]
+    total: (key, value, existing) -> if !isArray(value) then value else value.sort().reverse()[0]
+    pages: (key, value, existing) -> if !isArray(value) then value else value.sort().reverse()[0]
   as:
     bins: 
       path: 'Items.SearchBinSets.SearchBinSet.Bin'
