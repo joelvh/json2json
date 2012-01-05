@@ -24,7 +24,7 @@ Templates specify how the original JSON data will be represented **as** properti
 (The only time the **as** rules are ignored is if the **value** rule exists 
 when converting an array to a map.) 
 
-### Describing the example template
+## Describing the example template
 
 (Look at the "example" folder to see this template and the JSON before and after transformation.) 
 
