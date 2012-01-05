@@ -1,6 +1,6 @@
 { "name" : "json2json"
 , "description" : "A simple way to transform a JSON object to another JSON structure"
-, "version" : "0.1.6"
+, "version" : "0.1.7"
 , "author" : "Joel Van Horn <joel@joelvanhorn.com>"
 , "repository" :
   { "type" : "git"
@@ -11,7 +11,7 @@
 , "directories" : { "lib" : "./lib/" }
 , "main" : "./lib/json2json"
 , "dependencies" :
-  { "sysmo" : "https://github.com/joelvh/Sysmo.js/tarball/master"
+  { "sysmo" : "latest"
   }
 , "engines" : { "node" : ">=0.1.97" }
 , "licenses" : []
