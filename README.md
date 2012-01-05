@@ -19,88 +19,92 @@ A template specifies a set of rules that describe how to transform a property in
 A template itself is a javascript object. 
 This example is written in CoffeeScript and has in-line comments to explain each property: 
 
-    # Define a variable to hold your template object. 
-    # When the JSON object is transformed, the root template will process the root of the 
-    # JSON object. 
-    tmpl = 
-      # The "path" property (required) describes what property to transform in the JSON object. 
-      # The '.' value specifies that the root of the JSON object should be transformed. 
-      # The JSON object could be an object or an array. 
-      path: '.'
-      # The "aggregate" property (optional) allows you to combine array values into one value. 
-      # (Think of it as the "reduce" part of a map/reduce.) 
-      # Each property of the "aggregate" object specifies a function that handles each value in an array. 
-      # You can manipulate the "existing" value (anything that has already been aggregated) 
-      # or return a new value to use for the "items" property on your new JSON object. 
-      # (You can specify as many )
-      aggregate: 
-      	items: (key, value, existing) -> if !isArray(value) then value else value[0]
-      # The "as" property allows you to 
-      as: 
-        bins:  
-          path: 'Items.SearchBinSets.SearchBinSet.Bin' 
-          key: 'BinParameter.Value' 
-          value: 'BinItemCount' 
-          aggregate: (key, value, existing) -> Math.max(value, existing || 0) 
-        items:  
-          path: 'Items.Item' 
-          all: true 
-          as: 
-            #ASIN: 'ASIN' 
-            rank: 'SalesRank' 
-            title: 'ItemAttributes.Title' 
-            artist: 'ItemAttributes.Artist' 
-            manufacturer: 'ItemAttributes.Manufacturer' 
-            category: 'ItemAttributes.ProductGroup' 
-            price: 'Offers.Offer.OfferListing.Price.FormattedPrice' 
-            percent_saved: 'Offers.Offer.OfferListing.PercentageSaved' 
-            availability: 'Offers.Offer.OfferListing.Availability' 
-            price_new: 'OfferSummary.LowestNewPrice.FormattedPrice' 
-            price_used: 'OfferSummary.LowestUsedPrice.FormattedPrice' 
-            url: 'DetailPageURL' 
-            similar: 
-              path: 'SimilarProducts.SimilarProduct' 
-              key: 'ASIN' 
-              value: 'Title' 
-
-
+The template object is stored as the "tmpl" variable. 
+The template typically matches the root of the JSON object. 
 
     tmpl = 
+    
+The "path" property specifies what property on the JSON object to process. 
+The '.' value specifies to use the root in this case. 
+The JSON object can be an array as well. 
+
       path: '.' 
-      #all: true 
+      
+The "aggregate" property (optional) is used if you are processing an array. 
+It lets you process values of an array and combine them into one value or effectively filter an array. 
+The properties in the "aggregate" object are used as properties on your new JSON object. 
+The "existing" parameter sent to each aggregate function specifies a value if one exists on your new JSON object. 
+
       aggregate:  
         total: (key, value, existing) -> if !sysmo.isArray(value) then value else value.sort().reverse()[0] 
         pages: (key, value, existing) -> if !sysmo.isArray(value) then value else value.sort().reverse()[0] 
+
+The "as" property lets you specify all the properties you want on your new JSON object. 
+This is where you define the mapping rules. 
+It is effectively a list of nested templates. 
+
       as: 
+
+The "bins" property is going to be created on your new JSON object. 
+The object defined as the value of "bins" here is another set of rules that define what property 
+on the original JSON object to transform. 
+
         bins:  
+
+The "path" property is described above. 
+Here the value specifies where within the original JSON object to find the value you want. 
+It is possible to access properties of objects that are in an array. 
+An array of all values will be returned and used as the value to transform. 
+
           path: 'Items.SearchBinSets.SearchBinSet.Bin' 
+
+The "key" property lets you convert an array to a map. 
+The value of the "key" property specifies the path to the value to use as the property on the new map. 
+The value retrieved from the original JSON object will be converted to a string. 
+
           key: 'BinParameter.Value' 
+
+The "value" property (optional) lets you specify the property in the original JSON object to use as the value in the new map. 
+
           value: 'BinItemCount' 
+
+The "aggregate" property works the same as above, but instead of specifying a map of functions, 
+a single function is used to aggregate the array values being processed on the original JSON object.
+
           aggregate: (key, value, existing) -> Math.max(value, existing || 0) 
         items:  
           path: 'Items.Item' 
+
+The "all" property specifies that all properties on the matched object in the original JSON object for which 
+no rule has been defined should automatically be copied to the new JSON object.
+
           all: true 
           as: 
-            #ASIN: 'ASIN' 
-            rank: 'SalesRank' 
             title: 'ItemAttributes.Title' 
-            artist: 'ItemAttributes.Artist' 
-            manufacturer: 'ItemAttributes.Manufacturer' 
-            category: 'ItemAttributes.ProductGroup' 
             price: 'Offers.Offer.OfferListing.Price.FormattedPrice' 
-            percent_saved: 'Offers.Offer.OfferListing.PercentageSaved' 
-            availability: 'Offers.Offer.OfferListing.Availability' 
-            price_new: 'OfferSummary.LowestNewPrice.FormattedPrice' 
-            price_used: 'OfferSummary.LowestUsedPrice.FormattedPrice' 
-            url: 'DetailPageURL' 
             similar: 
               path: 'SimilarProducts.SimilarProduct' 
               key: 'ASIN' 
               value: 'Title' 
             images: 
               path: '.' 
+
+The "choose" property defines an array of properties on the original JSON object to transform and skip the rest. 
+
               choose: ['SmallImage', 'MediumImage', 'LargeImage'] 
+
+The "format" property defines a function that processes each of the values retrieved from the original JSON object 
+and returns an object with "key" and "value" properties. 
+This allows you to format the key and value however you wish. 
+The "node" parameter to the format function is the object or array in the original JSON that is being transformed. 
+(It is the object that contains the properties defined by the "choose" array.)
+
               format: (node, value, key) -> key: key.replace(/Image$/, '').toLowerCase() 
+
+The "nested" property indicates that the value of each property specified by "choose" should be a new object. 
+The properties defined in the "as" template below will be stored in the nested object instead of the object that the 
+"choose" properties are created on.
+
               nested: true 
               as: 
                 url: 'URL' 
@@ -116,10 +120,6 @@ This example is written in CoffeeScript and has in-line comments to explain each
                 url: 'URL' 
                 height: 'Height.#' 
                 width: 'Width.#' 
-            links: 
-              path: 'ItemLinks.ItemLink' 
-              key: 'Description' 
-              value: 'URL' 
     
     new ObjectTemplate(tmpl).transform data 
 
