@@ -151,6 +151,11 @@ passing the template to the constructor.
 Then call the "transform" method, passing it the data you want to transform. 
 
     new ObjectTemplate(tmpl).transform data 
+    
+## TODO
+
+* Need to convert a map (object) to an array
+
 
 ## License
 
