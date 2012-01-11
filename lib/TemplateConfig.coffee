@@ -14,6 +14,9 @@ class TemplateConfig
     
     # create settings
     @arrayToMap = !!config.key
+    # TODO: Need to implement converting a map to an array... 
+    #       This property was created to show how to specify converting maps to arrays
+    @mapToArray = !@arrayToMap and config.key is false and !config.as
     @directMap = !!(@arrayToMap and config.value)
     @nestTemplate = !!config.nested
     @includeAll = !!config.all

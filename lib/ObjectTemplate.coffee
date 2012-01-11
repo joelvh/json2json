@@ -105,7 +105,7 @@ class ObjectTemplate
   updateContext: (context, node, value, key) =>
     # format key and value
     formatted = @config.applyFormatting node, value, key
-    @aggregateValue(context, formatted.key, formatted.value)
+    @aggregateValue context, formatted.key, formatted.value
       
   aggregateValue: (context, key, value) =>
     return context if !value?
