@@ -1,0 +1,212 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Json2json by joelvh</title>
+    
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>Json2json</h1>
+        <p>Transform (reformat) JSON structures from one to another using JavaScript</p>
+        <p class="view"><a href="https://github.com/joelvh/json2json">View the Project on GitHub <small>joelvh/json2json</small></a></p>
+        <ul>
+          <li><a href="https://github.com/joelvh/json2json/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/joelvh/json2json/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/joelvh/json2json">Fork On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <h1>About json2json</h1>
+
+<p>Transforms one JSON object structure to another structure as defined by template rules. 
+Ideal for transforming JSON retrieved from web services to be used the way you need it in your application. </p>
+
+<p>json2json is written in CoffeeScript and designed to run in a Node.js envirionment. 
+It can be easily converted to JavaScript to be used in a browser as well.</p>
+
+<h2>Template rules</h2>
+
+<p>Template rules specify how the "original JSON" (raw data) is transformed to the "new JSON" format you need: </p>
+
+<p>A template specifies the <strong>path</strong> to the value on your original JSON you want to transform 
+and assumes that value is either an object or an array. 
+If it's an object, you can <strong>choose</strong> which properties you want to transform.
+If it's an array, you can <strong>aggregate</strong> the values you want to transform. </p>
+
+<p>Sometimes you want to convert an array to a map (aka JSON object). 
+To do this, you can specify what value on your original JSON to use as the <strong>key</strong>. 
+If you want to make it a really simple map, 
+you can specify what value on your original JSON to use as the <strong>value</strong>. </p>
+
+<p>Templates specify how the original JSON data will be represented <strong>as</strong> properties on the new JSON. 
+(The only time the <strong>as</strong> rules are ignored is if the <strong>value</strong> rule exists 
+when converting an array to a map.) </p>
+
+<h2>Describing the example template</h2>
+
+<p>(Look at the "example" folder to see this template and the JSON before and after transformation.) </p>
+
+<p>A template specifies a set of rules that describe how to transform a property in your original JSON. 
+A template itself is a javascript object. 
+This example is written in CoffeeScript and has comments to explain each property: </p>
+
+<p>The template object is stored as the "tmpl" variable. 
+The template typically matches the root of the original JSON. </p>
+
+<pre><code>tmpl = 
+</code></pre>
+
+<p>The "path" property specifies what property on the JSON object to process. 
+The '.' value specifies to use the root in this case. 
+The original JSON can be an array as well. </p>
+
+<pre><code>  path: '.' 
+</code></pre>
+
+<p>The "aggregate" property (optional) is used if you are processing an array. 
+It lets you process values of an array and combine them into one value or effectively filter an array. 
+The properties in the "aggregate" object are used as properties on your new JSON object. 
+The "existing" parameter sent to each aggregate function specifies a value if one exists on your new JSON object. </p>
+
+<pre><code>  aggregate:  
+    total: (key, value, existing) -&gt; if !sysmo.isArray(value) then value else value.sort().reverse()[0] 
+    pages: (key, value, existing) -&gt; if !sysmo.isArray(value) then value else value.sort().reverse()[0] 
+</code></pre>
+
+<p>The "as" property lets you specify all the properties you want on your new JSON object. 
+(These are the only properties that will be created on the new JSON object.) 
+This is where you define the mapping rules. 
+It is effectively a list of nested templates. </p>
+
+<pre><code>  as: 
+</code></pre>
+
+<p>The "bins" property is going to be created on your new JSON object. 
+The template defined for "bins" here is another set of rules that specify what property 
+on the original JSON object to transform. </p>
+
+<pre><code>    bins:  
+</code></pre>
+
+<p>The "path" property was described previously. 
+However, this time the path is relative to the value in the original JSON that was selected by the previous "path" (above). 
+It is possible to access properties of objects that are in an array. 
+A flattened array of all values will be returned and used as the value to transform. </p>
+
+<pre><code>      path: 'Items.SearchBinSets.SearchBinSet.Bin' 
+</code></pre>
+
+<p>The "key" property indicates you want to convert an array to a map. 
+The "key" property lets you specify the property in the original JSON object to use as the key in the new map. 
+The value retrieved from the original JSON object will be converted to a string. 
+(Alternatively, you can specify a function that is passed the original JSON value and returns a key to use.) </p>
+
+<pre><code>      key: 'BinParameter.Value' 
+</code></pre>
+
+<p>The "value" property (optional) lets you specify the property in the original JSON object to use as the value in the new map. 
+(Alternatively, you can specify a function that is passed the original JSON value and returns a value to use.) </p>
+
+<pre><code>      value: 'BinItemCount' 
+</code></pre>
+
+<p>The "aggregate" property works the same as previously described, but instead of specifying a map of functions, 
+a single function is used to aggregate the array values being processed on the original JSON object.</p>
+
+<pre><code>      aggregate: (key, value, existing) -&gt; Math.max(value, existing || 0) 
+    items:  
+      path: 'Items.Item' 
+</code></pre>
+
+<p>The "all" property specifies that all properties on the matched object in the original JSON object for which 
+no rule has been defined should automatically be copied to the new JSON object. 
+(By default, only the properties specified in the "as" template are created on the new JSON.) 
+The "all" option only works if "choose" is not defined (see below). </p>
+
+<pre><code>      all: true 
+      as: 
+        title: 'ItemAttributes.Title' 
+        price: 'Offers.Offer.OfferListing.Price.FormattedPrice' 
+        similar: 
+          path: 'SimilarProducts.SimilarProduct' 
+          key: 'ASIN' 
+          value: 'Title' 
+        images: 
+          path: '.' 
+</code></pre>
+
+<p>The "choose" property defines an array of properties on the original JSON object to transform and skip the rest. </p>
+
+<pre><code>          choose: ['SmallImage', 'MediumImage', 'LargeImage'] 
+</code></pre>
+
+<p>The "format" property defines a function that processes each of the values retrieved from the original JSON object 
+and returns an object with "key" and "value" properties. 
+This allows you to format the key and value however you wish. 
+(If a "key" or "value" property is not returned, the original value is used.) 
+The "node" parameter to the format function is the object or array in the original JSON that is being transformed. 
+(It is the object that contains the properties defined by the "choose" array.)</p>
+
+<pre><code>          format: (node, value, key) -&gt; key: key.replace(/Image$/, '').toLowerCase() 
+</code></pre>
+
+<p>The "nested" property indicates that the value of each property specified by "choose" should be a new object. 
+The properties defined in the "as" template below will be stored in the nested object instead of the object that the 
+"choose" properties are created on.</p>
+
+<pre><code>          nested: true 
+          as: 
+            url: 'URL' 
+            height: 'Height.#'  
+            width: 'Width.#' 
+        image_sets: 
+          path: 'ImageSets.ImageSet' 
+          key: '@.Category' 
+</code></pre>
+
+<p>The "choose" property can be a function that returns a boolean. 
+In the previous "choose" example, an array of property names (e.g. map/hash "keys") were specified, 
+which indicated what properties on the original JSON value to transform. 
+To provide more flexibility, a function can be used to dynamically choose which properties to transform. </p>
+
+<pre><code>          choose: (node, value, key) -&gt; key isnt '@' 
+          format: (node, value, key) -&gt; key: key.replace(/Image$/, '').toLowerCase() 
+          nested: true 
+          as: 
+            url: 'URL' 
+            height: 'Height.#' 
+            width: 'Width.#' 
+</code></pre>
+
+<p>And finally, create an instance of the "ObjectTemplate" object, 
+passing the template to the constructor. 
+Then call the "transform" method, passing it the data you want to transform. </p>
+
+<pre><code>new ObjectTemplate(tmpl).transform data 
+</code></pre>
+
+<h2>TODO</h2>
+
+<ul>
+<li>Need to convert a map (object) to an array</li>
+</ul><h2>License</h2>
+
+<p>Created by Joel Van Horn. Free to use however you please.</p>
+      </section>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/joelvh">joelvh</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+      </footer>
+    </div>
+    <script src="javascripts/scale.fix.js"></script>
+  </body>
+</html>
