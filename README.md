@@ -160,7 +160,7 @@ You can use the json2json library in your browser by converting the CoffeeScript
 You'll also need to include the Sysmo.js dependency. 
 Include the files in this order (the [json2json.coffee](lib/json2json.coffee) file is not necessary):
 
-  1. [Sysmo.js](https://github.com/joelvh/Sysmo.js/lib/sysmo.js)
+  1. [Sysmo.js](https://github.com/joelvh/Sysmo.js)
   2. TemplateConfig.js (converted from [TemplateConfig.coffee](lib/TemplateConfig.coffee))
   3. ObjectTemplate.js (converted from [ObjectTemplate.coffee](lib/ObjectTemplate.coffee))
 
