@@ -1,5 +1,8 @@
+# handle CommonJS/Node.js or browser
 
-sysmo = require 'sysmo'
+sysmo ||= (require?) ? require('sysmo') : window.Sysmo
+
+# class definition
 
 class TemplateConfig
   constructor: (config) ->
@@ -84,6 +87,11 @@ class TemplateConfig
     pair.key = key if 'key' not of pair
     pair.value = value if 'value' not of pair
     pair
-  
-# register module
-module.exports = TemplateConfig
+
+# register module (CommonJS/Node.js) or handle browser
+
+if module?
+  module.exports = TemplateConfig
+else
+  window.json2json or= {}
+  window.json2json.TemplateConfig = TemplateConfig
