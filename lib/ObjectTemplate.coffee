@@ -1,6 +1,10 @@
 
-sysmo = require 'sysmo'
-TemplateConfig = require './TemplateConfig'
+# handle CommonJS/Node.js or browser
+
+sysmo           ||= (require?) ? require('sysmo')             : window.Sysmo
+TemplateConfig  ||= (require?) ? require('./TemplateConfig')  : window.json2json.TemplateConfig
+
+# class definition
 
 class ObjectTemplate
   constructor: (config, parent) ->
@@ -163,5 +167,10 @@ class ObjectTemplate
     paths.push(path) if path and paths.indexOf(path) == -1
     paths
   
-# register module
-module.exports = ObjectTemplate
+# register module (CommonJS/Node.js) or handle browser
+
+if module?
+  module.exports = ObjectTemplate
+else
+  window.json2json or= {}
+  window.json2json.ObjectTemplate = ObjectTemplate
