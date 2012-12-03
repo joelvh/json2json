@@ -3,7 +3,7 @@
 Transforms one JSON object structure to another structure as defined by template rules. 
 Ideal for transforming JSON retrieved from web services to be used the way you need it in your application. 
 
-json2json is written in CoffeeScript and designed to run in a Node.js envirionment. 
+[json2json](https://github.com/joelvh/json2json) is written in [CoffeeScript](http://coffeescript.org) and designed to run in a [Node.js](http://nodejs.org) envirionment. 
 It can be easily converted to JavaScript to be used in a browser as well.
 
 # Tutorial
@@ -28,7 +28,7 @@ when converting an array to a map.)
 
 ## Describing the example template
 
-(Look at the "example" folder to see this template and the JSON before and after transformation.) 
+(Look at the "[example](example)" folder to see this [template](example/template.coffee) and the JSON [before](example/original.json) and [after](example/transformed.json) transformation.) 
 
 A template specifies a set of rules that describe how to transform a property in your original JSON. 
 A template itself is a javascript object. 
