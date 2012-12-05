@@ -1,8 +1,8 @@
 
 # handle CommonJS/Node.js or browser
 
-sysmo           ||= (require?) ? require('sysmo')             : window.Sysmo
-TemplateConfig  ||= (require?) ? require('./TemplateConfig')  : window.json2json.TemplateConfig
+sysmo           = require?('sysmo') || window?.Sysmo
+TemplateConfig  = require?('./TemplateConfig') || window?.json2json.TemplateConfig
 
 # class definition
 
