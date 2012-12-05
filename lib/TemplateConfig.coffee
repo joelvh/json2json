@@ -1,6 +1,6 @@
 # handle CommonJS/Node.js or browser
 
-sysmo ||= (require?) ? require('sysmo') : window.Sysmo
+sysmo = require?('sysmo') || window?.Sysmo
 
 # class definition
 
