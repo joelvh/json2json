@@ -14,7 +14,7 @@ class ObjectTemplate
   transform: (data) =>
     node = @nodeToProcess data
     
-    return null if !node?
+    return null unless node?
     
     # process properties
     switch sysmo.type node
@@ -41,9 +41,9 @@ class ObjectTemplate
     context = @createMapStructure node
     
     if @config.nestTemplate and (nested_key = @chooseKey(node))
-      nested_context = {}
-      nested_context[nested_key] = context;
-      context = nested_context
+      nested_context              = {}
+      nested_context[nested_key]  = context;
+      context                     = nested_context
     
     context
   
@@ -51,13 +51,13 @@ class ObjectTemplate
     
     context = {}
     
-    return @chooseValue(node, context) if !@config.nestTemplate
+    return @chooseValue(node, context) unless @config.nestTemplate
     
     # loop through properties to pick up any key/values that should be nested
     for key, value of node when @config.processable node, value, key
       # call @getNode() to register the use of the property on that node
-      nested = @getNode(node, key)
-      value = @chooseValue nested
+      nested  = @getNode(node, key)
+      value   = @chooseValue nested
       @updateContext context, nested, value, key
     context
   
@@ -85,7 +85,7 @@ class ObjectTemplate
       # process mapping instructions
       switch sysmo.type value
         # string should be the path to a property on the current node
-        when 'String'   then  filter = (node, path)   => result = @getNode(node, path) or null
+        when 'String'   then  filter = (node, path)   => @getNode(node, path)
         # array gets multiple property values
         when 'Array'    then  filter = (node, paths)  => @getNode(node, path) for path in paths
         # function is a custom filter for the node
@@ -112,7 +112,7 @@ class ObjectTemplate
     @aggregateValue context, formatted.key, formatted.value
       
   aggregateValue: (context, key, value) =>
-    return context if !value?
+    return context unless value?
     
     # if context is an array, just add the value
     if sysmo.isArray(context)
@@ -136,7 +136,7 @@ class ObjectTemplate
     @getNode node, @config.getPath()
   
   getNode: (node, path) =>
-    return null if !path
+    return null unless path
     return node if path is '.'
     @paths node, path
     sysmo.getDeepValue node, path, true
@@ -154,8 +154,7 @@ class ObjectTemplate
     
     index = @pathNodes.indexOf node
     
-    if !path
-      return if index isnt -1 then @pathCache[index] else []
+    return (if index isnt -1 then @pathCache[index] else []) unless path
     
     if index is -1
       paths = []

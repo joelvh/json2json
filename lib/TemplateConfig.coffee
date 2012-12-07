@@ -7,24 +7,24 @@ sysmo = require?('sysmo') || window?.Sysmo
 class TemplateConfig
   constructor: (config) ->
     # if there is no node path, set to current node
-    config.path or= '.'
+    config.path     or= '.'
     # ensure 'as' template exists
-    config.as or= {}
+    config.as       or= {}
     # convert property name to array
-    config.choose = [config.choose] if sysmo.isString config.choose
+    config.choose   = [config.choose] if sysmo.isString config.choose
     # include multiple templates to apply before this one
-    config.include = [config.include] if sysmo.isString config.include
+    config.include  = [config.include] if sysmo.isString config.include
     
     # create settings
-    @arrayToMap = !!config.key
+    @arrayToMap     = !!config.key
     # TODO: Need to implement converting a map to an array... 
     #       This property was created to show how to specify converting maps to arrays
-    @mapToArray = !@arrayToMap and config.key is false and !config.as
-    @directMap = !!(@arrayToMap and config.value)
-    @nestTemplate = !!config.nested
-    @includeAll = !!config.all
+    @mapToArray     = !@arrayToMap and config.key is false and !config.as
+    @directMap      = !!(@arrayToMap and config.value)
+    @nestTemplate   = !!config.nested
+    @includeAll     = !!config.all
     
-    @config = config
+    @config         = config
   
   getPath: =>
     @config.path
@@ -71,7 +71,7 @@ class TemplateConfig
   aggregate: (context, key, value, existing) =>
     aggregator = @config.aggregate?[key] or @config.aggregate
     
-    return false if !sysmo.isFunction(aggregator)
+    return false unless sysmo.isFunction(aggregator)
     
     context[key] = aggregator(key, value, existing)
     
@@ -81,11 +81,12 @@ class TemplateConfig
     # if key is a number, assume this is an array element and skip
     if !sysmo.isNumber(key)
       formatter = @config.format?[key] or @config.format
-      pair = if sysmo.isFunction(formatter) then formatter(node, value, key) else {}
-    else pair = {}
+      pair      = if sysmo.isFunction(formatter) then formatter(node, value, key) else {}
+    else
+      pair      = {}
     
-    pair.key = key if 'key' not of pair
-    pair.value = value if 'value' not of pair
+    pair.key    = key if 'key' not of pair
+    pair.value  = value if 'value' not of pair
     pair
 
 # register module (CommonJS/Node.js) or handle browser
