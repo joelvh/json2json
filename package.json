@@ -1,13 +1,13 @@
 { "name" : "json2json"
 , "description" : "A simple way to transform a JSON object to another JSON structure"
-, "version" : "0.2.2"
+, "version" : "0.2.3"
 , "author" : "Joel Van Horn <joel@joelvanhorn.com>"
 , "repository" :
   { "type" : "git"
   , "url" : "git://github.com/joelvh/json2json.git"
   }
 , "bugs" : { "url" : "https://github.com/joelvh/json2json/issues" }
-, "os" : [ "linux", "darwin", "freebsd" ]
+, "os" : [ "linux", "darwin", "freebsd", "win32" ]
 , "directories" : { "lib" : "./lib/" }
 , "main" : "./lib/json2json"
 , "dependencies" :
