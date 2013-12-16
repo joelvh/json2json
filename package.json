@@ -9,7 +9,7 @@
 , "bugs" : { "url" : "https://github.com/joelvh/json2json/issues" }
 , "os" : [ "linux", "darwin", "freebsd", "win32" ]
 , "directories" : { "lib" : "./lib/" }
-, "main" : "./lib/json2json"
+, "main" : "index.js"
 , "dependencies" :
   { "coffee-script" : ">=1.2.0"
   , "sysmo" : ">=0.0.11"
