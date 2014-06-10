@@ -12,7 +12,7 @@
 , "main" : "index.js"
 , "dependencies" :
   { "coffee-script" : ">=1.2.0"
-  , "sysmo" : ">=0.0.11"
+  , "sysmo" : "git+ssh://git@github.com:matthiasg/Sysmo.js.git"
   }
 , "engines" : { "node" : ">=0.1.97" }
 , "licenses" : []
