@@ -7,7 +7,7 @@
   , "url" : "git://github.com/joelvh/json2json.git"
   }
 , "bugs" : { "url" : "https://github.com/joelvh/json2json/issues" }
-, "os" : [ "linux", "darwin", "freebsd", "win32" ]
+, "os" : [ "linux", "darwin", "freebsd", "win32", "sunos" ]
 , "directories" : { "lib" : "./lib/" }
 , "main" : "index.js"
 , "dependencies" :
