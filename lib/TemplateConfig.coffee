@@ -23,6 +23,7 @@ class TemplateConfig
     @directMap      = !!(@arrayToMap and config.value)
     @nestTemplate   = !!config.nested
     @includeAll     = !!config.all
+    @forceArray     = !!config.forceArray
     
     @config         = config
   
