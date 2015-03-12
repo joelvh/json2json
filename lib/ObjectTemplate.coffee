@@ -109,7 +109,10 @@ class ObjectTemplate
   updateContext: (context, node, value, key) =>
     # format key and value
     formatted = @config.applyFormatting node, value, key
-    @aggregateValue context, formatted.key, formatted.value
+    if sysmo.isArray(formatted)
+      @aggregateValue context, item.key, item.value for item in formatted
+    else if formatted?
+      @aggregateValue context, formatted.key, formatted.value
       
   aggregateValue: (context, key, value) =>
     return context unless value?
