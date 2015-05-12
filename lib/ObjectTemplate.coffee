@@ -37,7 +37,9 @@ class ObjectTemplate
     context
   
   processMap: (node) =>
-    
+
+    if @config.forceArray then return @processArray [node]
+
     context = @createMapStructure node
     
     if @config.nestTemplate and (nested_key = @chooseKey(node))
