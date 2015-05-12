@@ -114,7 +114,7 @@ The "choose" property defines an array of properties on the original JSON object
               choose: ['SmallImage', 'MediumImage', 'LargeImage'] 
 
 The "format" property defines a function that processes each of the values retrieved from the original JSON object 
-and returns an object with "key" and "value" properties. 
+and returns an object with "key" and "value" properties or an array which contains object(s) with "key" and "value" properties. If an array is returned, all entries in the array are added to the current context node in the new JSON. 
 This allows you to format the key and value however you wish. 
 (If a "key" or "value" property is not returned, the original value is used.) 
 The "node" parameter to the format function is the object or array in the original JSON that is being transformed. 
