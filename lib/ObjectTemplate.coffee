@@ -1,4 +1,3 @@
-
 # handle CommonJS/Node.js or browser
 
 sysmo           = require?('sysmo') || window?.Sysmo
@@ -37,7 +36,9 @@ class ObjectTemplate
     context
   
   processMap: (node) =>
-    
+
+    if @config.ensureArray then return @processArray [node]
+
     context = @createMapStructure node
     
     if @config.nestTemplate and (nested_key = @chooseKey(node))
