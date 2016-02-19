@@ -10,10 +10,12 @@
 , "os" : [ "linux", "darwin", "freebsd", "win32", "sunos" ]
 , "directories" : { "lib" : "./lib/" }
 , "main" : "index.js"
+, "scripts" : { "test": "mocha --compilers coffee:coffee-script/register" }
 , "dependencies" :
   { "coffee-script" : ">=1.7.0"
   , "sysmo" : ">=0.0.11"
   }
+, "devDependencies": { "chai": "^3.5.0" }
 , "engines" : { "node" : ">=0.1.97" }
 , "licenses" : []
 }

@@ -146,7 +146,11 @@ To provide more flexibility, a function can be used to dynamically choose which 
               as: 
                 url: 'URL' 
                 height: 'Height.#' 
-                width: 'Width.#' 
+                width: 'Width.#'
+
+The "ensureArray" property indicates that the matched property should be wrapped in an array if it is not already an array.
+
+              ensureArray: true
 
 And finally, create an instance of the "ObjectTemplate" object, 
 passing the template to the constructor. 

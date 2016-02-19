@@ -1,4 +1,3 @@
-
 # handle CommonJS/Node.js or browser
 
 sysmo           = require?('sysmo') || window?.Sysmo
@@ -33,11 +32,16 @@ class ObjectTemplate
       key = if @config.arrayToMap then @chooseKey(element) else index
       # don't call @processMap because it can lead to double nesting if @config.nestTemplate is true
       value = @createMapStructure(element)
+      # because we don't call @processMap we have to manually ensure values are arrays
+      if @config.arrayToMap and @config.ensureArray and !context[key]?
+        value = [value]
       @updateContext context, element, value, key
     context
   
   processMap: (node) =>
-    
+
+    if @config.ensureArray then return @processArray [node]
+
     context = @createMapStructure node
     
     if @config.nestTemplate and (nested_key = @chooseKey(node))
