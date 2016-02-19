@@ -11,7 +11,7 @@
 , "directories" : { "lib" : "./lib/" }
 , "main" : "index.js"
 , "dependencies" :
-  { "coffee-script" : ">=1.2.0"
+  { "coffee-script" : ">=1.7.0"
   , "sysmo" : ">=0.0.11"
   }
 , "engines" : { "node" : ">=0.1.97" }
