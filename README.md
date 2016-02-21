@@ -107,7 +107,12 @@ The "all" option only works if "choose" is not defined (see below).
               key: 'ASIN' 
               value: 'Title' 
             images: 
-              path: '.' 
+              path: '.'
+
+Any properties on the matched object that are null or undefined will not be copied to the new JSON object.
+To include these properties set "ignoreEmpty" to false.
+
+          ignoreEmpty: false
 
 The "choose" property defines an array of properties on the original JSON object to transform and skip the rest. 
 

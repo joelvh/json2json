@@ -119,7 +119,7 @@ class ObjectTemplate
       @aggregateValue context, formatted.key, formatted.value
       
   aggregateValue: (context, key, value) =>
-    return context unless value?
+    return context unless value? or !@config.ignoreEmpty
     
     # if context is an array, just add the value
     if sysmo.isArray(context)
