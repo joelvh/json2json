@@ -1,4 +1,4 @@
-# About json2json
+# About json2json [![Build Status](https://travis-ci.org/joelvh/json2json.svg?branch=master)](https://travis-ci.org/joelvh/json2json)
 
 Transforms one JSON object structure to another structure as defined by template rules. 
 Ideal for transforming JSON retrieved from web services to be used the way you need it in your application. 
