@@ -47,3 +47,15 @@ describe 'ObjectTemplate', ->
       new json2json.ObjectTemplate { path: 'user', all: true, ignoreEmpty: false }
         .transform json
       .should.include.keys [ 'age', 'email' ]
+
+    it 'should get defaults from `TemplateConfig.defaults`', ->
+      new json2json.ObjectTemplate { path: 'user', all: true }
+        .transform json
+        .should.not.include.keys [ 'age', 'email' ]
+
+      json2json.TemplateConfig.defaults.path = 'thisWillBeOverwritten'
+      json2json.TemplateConfig.defaults.ignoreEmpty = false
+
+      new json2json.ObjectTemplate { path: 'user', all: true  }
+        .transform json
+        .should.include.keys [ 'age', 'email' ]
