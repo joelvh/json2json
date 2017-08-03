@@ -163,6 +163,12 @@ Then call the "transform" method, passing it the data you want to transform.
 
     new ObjectTemplate(tmpl).transform data 
 
+## Overriding the default template rules
+
+The default rules used when creating templates (and nested templates) can be overridden via "TemplateConfig.defaults":
+
+    TemplateConfig.defaults.ignoreEmpty = false
+
 # Using json2json in your browser
 
 You can use the json2json library in your browser by converting the CoffeeScript files to JavaScript first. 

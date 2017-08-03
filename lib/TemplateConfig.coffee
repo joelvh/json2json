@@ -5,11 +5,14 @@ sysmo = require?('sysmo') || window?.Sysmo
 # class definition
 
 class TemplateConfig
+  @defaults:
+    path: '.'
+    as: {}
+    ignoreEmpty: true
+
   constructor: (config) ->
-    # if there is no node path, set to current node
-    config.path     or= '.'
-    # ensure 'as' template exists
-    config.as       or= {}
+    sysmo.extend(config, @constructor.defaults)
+
     # convert property name to array
     config.choose   = [config.choose] if sysmo.isString config.choose
     # include multiple templates to apply before this one
@@ -24,7 +27,7 @@ class TemplateConfig
     @nestTemplate   = !!config.nested
     @includeAll     = !!config.all
     @ensureArray    = !!config.ensureArray
-    @ignoreEmpty    = config.ignoreEmpty != false
+    @ignoreEmpty    = !!config.ignoreEmpty
 
     @config         = config
   
