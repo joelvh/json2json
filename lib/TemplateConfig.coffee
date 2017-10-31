@@ -17,10 +17,10 @@ class TemplateConfig
     config.choose   = [config.choose] if sysmo.isString config.choose
     # include multiple templates to apply before this one
     config.include  = [config.include] if sysmo.isString config.include
-    
+
     # create settings
     @arrayToMap     = !!config.key
-    # TODO: Need to implement converting a map to an array... 
+    # TODO: Need to implement converting a map to an array...
     #       This property was created to show how to specify converting maps to arrays
     @mapToArray     = !@arrayToMap and config.key is false and !config.as
     @directMap      = !!(@arrayToMap and config.value)
@@ -30,26 +30,26 @@ class TemplateConfig
     @ignoreEmpty    = !!config.ignoreEmpty
 
     @config         = config
-  
+
   getPath: =>
     @config.path
-  
+
   # used to get a key when converting an array to a map
   getKey: (node) =>
     switch sysmo.type @config.key
       when 'Function'   then  name: 'value',    value: @config.key node
       else                    name: 'path',     value: @config.key
-  
+
   # used to get a single value when converting an array to a map
   getValue: (node, context) =>
     switch sysmo.type @config.value
       when 'Function'   then  name: 'value',    value: @config.value node
       when 'String'     then  name: 'path',     value: @config.value
       else                    name: 'template', value: @config.as
-  
+
   # indicates if the key/value pair should be included in transformation
   processable: (node, value, key) =>
-    # no choose() implies all properties go, 
+    # no choose() implies all properties go,
     # but there are other properties that may cause filtering
     return true if !@config.choose and @includeAll # and !@nestTemplate
 
@@ -70,18 +70,18 @@ class TemplateConfig
       !!(@includeAll or @directMap) #boolean
     else
       !!@config.choose.call @, node, value, key
-  
+
   # used to combine or reduce a value if one already exists in the context.
   # can be a map that aggregates specific properties
   aggregate: (context, key, value, existing) =>
     aggregator = @config.aggregate?[key] or @config.aggregate
-    
+
     return false unless sysmo.isFunction(aggregator)
-    
+
     context[key] = aggregator(key, value, existing)
-    
+
     return true
-  
+
   applyFormatting: (node, value, key) =>
     # if key is a number, assume this is an array element and skip
     if !sysmo.isNumber(key)
@@ -89,7 +89,7 @@ class TemplateConfig
       pair      = if sysmo.isFunction(formatter) then formatter(node, value, key) else {}
     else
       pair      = {}
-    
+
     pair.key    = key if 'key' not of pair
     pair.value  = value if 'value' not of pair
     pair
