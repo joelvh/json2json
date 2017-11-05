@@ -68,16 +68,16 @@ describe 'ObjectTemplate', ->
           .should.deep.equal ['Belgian Waffles','$5.95']
 
         it 'should extract all the property values of each map into a nested array', ->
-          what = new json2json.ObjectTemplate { path: 'sportsTeams', key: false, mapToArray: true, as: false, nested: true }
+          what = new json2json.ObjectTemplate { path: 'sportsTeams', key: false, mapToArray: true, as: false}
             .transform json
             .should.deep.equal [['yankees', 'New York Yankees', [ 'Alex', 'Starlin' ]], ['cubs', 'Chicago Cubs', 'Jason']]
 
         it 'should extract only the specified properties of each map into a nested array', ->
-          what = new json2json.ObjectTemplate { path: 'sportsTeams', key: false, mapToArray: true, as: false, choose: ['id'], nested: true }
+          what = new json2json.ObjectTemplate { path: 'sportsTeams', key: false, mapToArray: true, as: false, choose: ['id']}
             .transform json
             .should.deep.equal [['yankees'], ['cubs']]
 
         it 'should extract only the specified properties of each map into a nested array', ->
-          what = new json2json.ObjectTemplate { path: 'sportsTeams', key: false, mapToArray: true, as: false, choose: ['id'], nested: true, flatArray: true }
+          what = new json2json.ObjectTemplate { path: 'sportsTeams', key: false, mapToArray: true, as: false, choose: ['id'], flatArray: true }
             .transform json
             .should.deep.equal ['yankees', 'cubs']

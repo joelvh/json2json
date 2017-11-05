@@ -157,6 +157,22 @@ The "ensureArray" property indicates that the matched property should be wrapped
 
               ensureArray: true
 
+To convert an object into an array, the following properties must be specified
+
+              key: false
+              as: false
+              mapToArray: true
+
+This will push all values of properties in the object into an array.
+
+To select the keys whose values are pushed into the array, specify the keys in the "choose" property.
+
+              choose: ['SmallImage', 'MediumImage', 'LargeImage']
+
+If the data you want to transform contains an array of objects and you want all the values pushed into a single array instead of nested arrays, specify the "flatArray" property.
+
+              flatArray: true
+
 And finally, create an instance of the "ObjectTemplate" object,
 passing the template to the constructor.
 Then call the "transform" method, passing it the data you want to transform.
