@@ -143,7 +143,11 @@ class ObjectTemplate
 
     # if context is an array, just add the value
     if sysmo.isArray(context)
-      context.push(value)
+      if @config.config.flatArray && sysmo.isArray(value)
+        context.push.apply(context, value)
+      else
+        context.push(value)
+
       return context
 
     existing = context[key]
