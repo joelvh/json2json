@@ -77,7 +77,7 @@ describe 'ObjectTemplate', ->
             .transform json
             .should.deep.equal [['yankees'], ['cubs']]
 
-        it 'should extract only the specified properties of each map into a nested array', ->
+        it 'should extract only the specified properties of each map into a flattened array', ->
           what = new json2json.ObjectTemplate { path: 'sportsTeams', key: false, mapToArray: true, as: false, choose: ['id'], flatArray: true }
             .transform json
             .should.deep.equal ['yankees', 'cubs']
